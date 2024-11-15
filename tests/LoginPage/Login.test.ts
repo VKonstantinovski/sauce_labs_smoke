@@ -23,6 +23,7 @@ test.describe("Login tests, @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
 
@@ -33,9 +34,11 @@ test.describe("Login tests, @negative", () => {
 
     test.beforeEach(async ({ page }) => {
         await page.goto(LOGIN_PAGE_URL)
-
     })
 
+    test.afterEach(async ({ page }) => {
+        page.close
+    })
 
 
     test("Log in with invalid credentials - No password, @negative", async ({ page }) => {
@@ -47,7 +50,6 @@ test.describe("Login tests, @negative", () => {
         await expect(errorMessage).toHaveText(MISSING_PASSWORD_ERROR_MESSAGE)
     })
 
-
     test("Log in with invalid credentials - No username, @negative", async ({ page }) => {
         await page.getByTestId(PASSWORD_LOCATOR).fill(PASSWORD)
         await page.getByTestId(LOGIN_BUTTON_LOCATOR).press("Enter")
@@ -56,9 +58,6 @@ test.describe("Login tests, @negative", () => {
         expect(errorMessage).toBeVisible
         await expect(errorMessage).toHaveText(MISSING_USERNAME_ERROR_MESSAGE)
     })
-
-
-
 
     test("Log in with invalid credentials - Blocked user, @negative", async ({ page }) => {
         await page.getByTestId(USER_NAME_LOCATOR).fill(BLOCKED_USER_NAME)
@@ -69,9 +68,4 @@ test.describe("Login tests, @negative", () => {
         expect(errorMessage).toBeVisible
         await expect(errorMessage).toHaveText(BLOCKED_USER_ERROR_MESSAGE)
     })
-
-    // // Need to find a realiable way to close all browser instances
-    // test.afterAll(async ({ browser }) => {
-    //     browser.close
-    // })
 })

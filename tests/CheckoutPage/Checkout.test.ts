@@ -40,13 +40,13 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
 
 
 
-        expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
+        await expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
 
         await page.getByTestId(CHECKOUT_FIRST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.FIRST_NAME)
         await page.getByTestId(CHECKOUT_LAST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.LAST_NAME)
         await page.getByTestId(CHECKOUT_POSTAL_CODE_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
-        await page.getByTestId("continue").click({ force: true })
+        await page.getByTestId(CONTINUE_TO_PAYMENT_BUTTON_LOCATOR).click({ force: true })
 
         const itemTotalText = await page.locator(PRICE_TOTAL_LOCATORS.ITEM_TOTAL).textContent();
         const taxText = await page.locator(PRICE_TOTAL_LOCATORS.TAX).textContent();
