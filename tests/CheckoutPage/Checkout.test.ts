@@ -1,12 +1,13 @@
 import test, { expect } from "@playwright/test"
 import { PRODUCT_DETAILS, PRODUCT_PRICES } from "../../Constants/Pages/AllItemsPage/AllItemsConstants.spec"
-import { EXPAND_SIDE_MENU_LOCATOR, LOGOUT_BUTTON_LOCATOR, ADD_ITEMS_TO_CART } from "../../Constants/Pages/AllItemsPage/AllItemsLocators.spec"
+import { EXPAND_SIDE_MENU_LOCATOR, LOGOUT_BUTTON_LOCATOR, ADD_ITEMS_TO_CART, REMOVE_ITEMS_FROM_CART } from "../../Constants/Pages/AllItemsPage/AllItemsLocators.spec"
 import { OPEN_CART_DETAILS_BUTTON_LOCATOR } from "../../Constants/Pages/CartPage/CartPageLocators.spec"
 import { ITEM_NAMES_TEXT } from "../../Constants/Pages/ItemDetailsPage/ItemDetailsConstants.spec"
 import { LOGIN_PAGE_URL, USER_NAME, PASSWORD } from "../../Constants/Pages/LoginPage/LoginConstants.spec"
 import { USER_NAME_LOCATOR, PASSWORD_LOCATOR, LOGIN_BUTTON_LOCATOR } from "../../Constants/Pages/LoginPage/LoginLocators.spec"
-import { CHECKOUT_DETAILS, extractAmount } from "../../Constants/Pages/CheckoutPage/CheckoutConstants.spec"
-import { ITEM_TOTAL_LOCATOR, TAX_LOCATOR, TOTAL_LOCATOR } from "../../Constants/Pages/CheckoutPage/CheckoutLocators.spec"
+import { CHECKOUT_DETAILS, CHECKOUT_TITLE_TEXT, ERROR_MESSAGE_TEXT, extractAmount, ORDER_COMPLETE_TEXT, PRICE_TOTAL_LABEL_TEXT, SHIPPING_INFORMATION_TEXT } from "../../Constants/Pages/CheckoutPage/CheckoutConstants.spec"
+import { CHECKOUT_BUTTON_LOCATOR, CHECKOUT_FIRST_NAME_FIELD_LOCATOR, CHECKOUT_LAST_NAME_FIELD_LOCATOR, CHECKOUT_POSTAL_CODE_FIELD_LOCATOR, CHECKOUT_TITLE_LOCATOR, CONTINUE_SHOPPING_BUTTON_LOCATOR, CONTINUE_TO_PAYMENT_BUTTON_LOCATOR, ERROR_MESSAGE_LOCATOR, FINISH_BUTTON_LOCATOR, ORDER_COMPLETE_LOCATORS, PAYMENT_INFORMATION_LOCATORS, PAYMENT_INFORMATION_TEXT, PRICE_TOTAL_LOCATORS, SHIPPING_INFORMATION_LOCATORS, } from "../../Constants/Pages/CheckoutPage/CheckoutLocators.spec"
+import { ITEM_DETAILS_LOCATORS } from "../../Constants/Pages/CartPage/CartPageConstants.spec"
 
 test.describe("Buy an item - Checkout Page , @positive", () => {
 
@@ -23,50 +24,55 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
+
     })
 
     test("Buy an item - Checkout Page, @positive", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        page.getByTestId("checkout").click({ force: true })
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        page.getByTestId(CHECKOUT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
 
-        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.LAST_NAME)
-        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.POSTAL_CODE)
+
+        expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
+
+        await page.getByTestId(CHECKOUT_FIRST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_LAST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.LAST_NAME)
+        await page.getByTestId(CHECKOUT_POSTAL_CODE_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
         await page.getByTestId("continue").click({ force: true })
 
-        const itemTotalText = await page.locator(ITEM_TOTAL_LOCATOR).textContent();
-        const taxText = await page.locator(TAX_LOCATOR).textContent();
-        const totalText = await page.locator(TOTAL_LOCATOR).textContent();
+        const itemTotalText = await page.locator(PRICE_TOTAL_LOCATORS.ITEM_TOTAL).textContent();
+        const taxText = await page.locator(PRICE_TOTAL_LOCATORS.TAX).textContent();
+        const totalText = await page.locator(PRICE_TOTAL_LOCATORS.TOTAL).textContent();
 
         const itemTotal = extractAmount(itemTotalText);
         const tax = extractAmount(taxText);
         const total = extractAmount(totalText);
 
 
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("payment-info-label")).toHaveText("Payment Information:")
-        expect(page.getByTestId("payment-info-value")).toHaveText
-        expect(page.getByTestId("shipping-info-label")).toHaveText("Shipping Information:")
-        expect(page.getByTestId("shipping-info-value")).toHaveText("Free Pony Express Delivery!")
-        expect(page.getByTestId("total-info-label")).toHaveText("Price Total")
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+
+        expect(page.getByTestId(PAYMENT_INFORMATION_LOCATORS.PAYMENT_INFORMATION_LABEL)).toHaveText(PAYMENT_INFORMATION_TEXT.PAYMENT_INFORMATION_LABEL_TEXT)
+        expect(page.getByTestId(PAYMENT_INFORMATION_LOCATORS.PAYMENT_INFORMATION_VALUE)).toHaveText
+        expect(page.getByTestId(SHIPPING_INFORMATION_LOCATORS.SHIPPING_INFORMATION_LABEL)).toHaveText(SHIPPING_INFORMATION_TEXT.SHIPPING_INFORMATION_LABEL_TEXT)
+        expect(page.getByTestId(SHIPPING_INFORMATION_LOCATORS.SHIPPING_INFORMATION_VALUE)).toHaveText(SHIPPING_INFORMATION_TEXT.SHIPPING_INFORMATION_VALUE_TEXT)
+        expect(page.getByTestId(PRICE_TOTAL_LOCATORS.PRICE_TOTAL_LABEL)).toHaveText(PRICE_TOTAL_LABEL_TEXT)
         expect(itemTotal + tax).toBeCloseTo(total, 2)
 
-        await page.getByTestId("finish").click({ force: true })
+        await page.getByTestId(FINISH_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("complete-header")).toHaveText("Thank you for your order!")
-        expect(page.getByTestId("complete-text")).toHaveText("Your order has been dispatched, and will arrive just as fast as the pony can get there!")
-        expect(page.getByTestId("back-to-products")).toHaveText("Back Home")
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.ORDER_COMPLETE_HEADER)).toHaveText(ORDER_COMPLETE_TEXT.ORDER_COMPLETE_HEADER)
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.ORDER_COMPLETE_VALUE)).toHaveText(ORDER_COMPLETE_TEXT.ORDER_COMPLETE_TEXT)
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.BACK_HOME_BUTTON)).toHaveText(ORDER_COMPLETE_TEXT.BACK_HOME_BUTTON)
     })
 
     test("Buy All Items - Cart Page, @positive", async ({ page }) => {
@@ -79,13 +85,13 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
 
-        const itemName = page.getByTestId("inventory-item-name")
-        const itemDescription = page.getByTestId("inventory-item-desc")
-        const itemPrice = page.getByTestId("inventory-item-price")
+        const itemName = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)
+        const itemDescription = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)
+        const itemPrice = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)
 
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        expect(page.getByTestId("checkout")).toBeVisible()
-        expect(page.getByTestId("remove-sauce-labs-backpack")).toBeVisible()
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(CHECKOUT_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK)).toBeVisible()
 
         //Can be and should be improved to loop it somehow or match objects...
         expect(itemName.nth(0)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
@@ -109,34 +115,38 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
         expect(itemPrice.nth(4)).toHaveText(PRODUCT_PRICES.ONESIE)
         expect(itemPrice.nth(5)).toHaveText(PRODUCT_PRICES.T_SHIRT_RED)
 
-        page.getByTestId("checkout").click({ force: true })
+        page.getByTestId(CHECKOUT_BUTTON_LOCATOR).click({ force: true })
 
-        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_FIRST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_LAST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.LAST_NAME)
+        await page.getByTestId(CHECKOUT_POSTAL_CODE_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
-        await page.getByTestId("continue").click({ force: true })
+        await page.getByTestId(CONTINUE_TO_PAYMENT_BUTTON_LOCATOR).click({ force: true })
 
-        const itemTotalText = await page.locator(ITEM_TOTAL_LOCATOR).textContent();
-        const taxText = await page.locator(TAX_LOCATOR).textContent();
-        const totalText = await page.locator(TOTAL_LOCATOR).textContent();
+        const itemTotalText = await page.locator(PRICE_TOTAL_LOCATORS.ITEM_TOTAL).textContent();
+        const taxText = await page.locator(PRICE_TOTAL_LOCATORS.TAX).textContent();
+        const totalText = await page.locator(PRICE_TOTAL_LOCATORS.TOTAL).textContent();
 
         const itemTotal = extractAmount(itemTotalText);
         const tax = extractAmount(taxText);
         const total = extractAmount(totalText);
 
-        expect(page.getByTestId("payment-info-label")).toHaveText("Payment Information:")
-        expect(page.getByTestId("payment-info-value")).toHaveText
-        expect(page.getByTestId("shipping-info-label")).toHaveText("Shipping Information:")
-        expect(page.getByTestId("shipping-info-value")).toHaveText("Free Pony Express Delivery!")
-        expect(page.getByTestId("total-info-label")).toHaveText("Price Total")
+        expect(page.getByTestId(PAYMENT_INFORMATION_LOCATORS.PAYMENT_INFORMATION_LABEL)).toHaveText(PAYMENT_INFORMATION_TEXT.PAYMENT_INFORMATION_LABEL_TEXT)
+        expect(page.getByTestId(PAYMENT_INFORMATION_LOCATORS.PAYMENT_INFORMATION_VALUE)).toHaveText
+        expect(page.getByTestId(SHIPPING_INFORMATION_LOCATORS.SHIPPING_INFORMATION_LABEL)).toHaveText(SHIPPING_INFORMATION_TEXT.SHIPPING_INFORMATION_LABEL_TEXT)
+        expect(page.getByTestId(SHIPPING_INFORMATION_LOCATORS.SHIPPING_INFORMATION_VALUE)).toHaveText(SHIPPING_INFORMATION_TEXT.SHIPPING_INFORMATION_VALUE_TEXT)
+        expect(page.getByTestId(PRICE_TOTAL_LOCATORS.PRICE_TOTAL_LABEL)).toHaveText(PRICE_TOTAL_LABEL_TEXT)
         expect(itemTotal + tax).toBeCloseTo(total, 2)
 
-        await page.getByTestId("finish").click({ force: true })
+        await page.getByTestId(FINISH_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("complete-header")).toHaveText("Thank you for your order!")
-        expect(page.getByTestId("complete-text")).toHaveText("Your order has been dispatched, and will arrive just as fast as the pony can get there!")
-        expect(page.getByTestId("back-to-products")).toHaveText("Back Home")
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.ORDER_COMPLETE_HEADER)).toHaveText(ORDER_COMPLETE_TEXT.ORDER_COMPLETE_HEADER)
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.ORDER_COMPLETE_VALUE)).toHaveText(ORDER_COMPLETE_TEXT.ORDER_COMPLETE_TEXT)
+        expect(page.getByTestId(ORDER_COMPLETE_LOCATORS.BACK_HOME_BUTTON)).toHaveText(ORDER_COMPLETE_TEXT.BACK_HOME_BUTTON)
+
+
+
+
     })
 })
 test.describe("Buy an item without valid information - Checkout Page , @negative", () => {
@@ -154,26 +164,27 @@ test.describe("Buy an item without valid information - Checkout Page , @negative
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Buy an item without First Name - Checkout Page, @negative", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        page.getByTestId("checkout").click({ force: true })
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        page.getByTestId(CHECKOUT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+        expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
 
-        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_LAST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.LAST_NAME)
+        await page.getByTestId(CHECKOUT_POSTAL_CODE_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
-        await page.getByTestId("continue").click({ force: true })
+        await page.getByTestId(CONTINUE_TO_PAYMENT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("error")).toHaveText("Error: First Name is required")
+        expect(page.getByTestId(ERROR_MESSAGE_LOCATOR)).toHaveText(ERROR_MESSAGE_TEXT.FIRST_NAME)
 
 
     })
@@ -181,20 +192,20 @@ test.describe("Buy an item without valid information - Checkout Page , @negative
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        page.getByTestId("checkout").click({ force: true })
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        page.getByTestId(CHECKOUT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+        expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
 
-        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.POSTAL_CODE)
+        await page.getByTestId(CHECKOUT_FIRST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_POSTAL_CODE_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
-        await page.getByTestId("continue").click({ force: true })
+        await page.getByTestId(CONTINUE_TO_PAYMENT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("error")).toHaveText("Error: Last Name is required")
+        expect(page.getByTestId(ERROR_MESSAGE_LOCATOR)).toHaveText(ERROR_MESSAGE_TEXT.LAST_NAME)
 
 
     })
@@ -203,20 +214,23 @@ test.describe("Buy an item without valid information - Checkout Page , @negative
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        page.getByTestId("checkout").click({ force: true })
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        page.getByTestId(CHECKOUT_BUTTON_LOCATOR).click({ force: true })
 
-        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+        expect(page.getByTestId(CHECKOUT_TITLE_LOCATOR)).toHaveText(CHECKOUT_TITLE_TEXT)
 
-        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.LAST_NAME)
 
-        await page.getByTestId("continue").click({ force: true })
+        await page.getByTestId(CHECKOUT_FIRST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId(CHECKOUT_LAST_NAME_FIELD_LOCATOR).fill(CHECKOUT_DETAILS.LAST_NAME)
 
-        expect(page.getByTestId("error")).toHaveText("Error: Postal Code is required")
+
+
+        await page.getByTestId(CONTINUE_TO_PAYMENT_BUTTON_LOCATOR).click({ force: true })
+
+        expect(page.getByTestId(ERROR_MESSAGE_LOCATOR)).toHaveText(ERROR_MESSAGE_TEXT.POSTAL_CODE)
 
 
 
