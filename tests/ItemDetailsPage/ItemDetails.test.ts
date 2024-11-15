@@ -19,6 +19,7 @@ test.describe("Add Items to cart - Item Details  , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Add item to cart-cart details , @positive", async ({ page }) => {
@@ -48,6 +49,7 @@ test.describe("Remove Items from cart - Item Details  , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Add item to cart-cart details , @positive", async ({ page }) => {

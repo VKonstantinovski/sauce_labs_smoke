@@ -6,6 +6,8 @@ import { OPEN_CART_DETAILS_BUTTON_LOCATOR } from "../../Constants/Pages/CartPage
 import { ITEM_NAMES_TEXT } from "../../Constants/Pages/ItemDetailsPage/ItemDetailsConstants.spec"
 import { PRODUCT_DETAILS, PRODUCT_PRICES } from "../../Constants/Pages/AllItemsPage/AllItemsConstants.spec"
 import { REMOVE_FROM_CART_BUTTON_LOCATOR } from "../../Constants/Pages/ItemDetailsPage/ItemDetailsLocators.spec"
+import { ITEM_DETAILS_LOCATORS } from "../../Constants/Pages/CartPage/CartPageConstants.spec"
+import { CHECKOUT_BUTTON_LOCATOR, CONTINUE_SHOPPING_BUTTON_LOCATOR } from "../../Constants/Pages/CheckoutPage/CheckoutLocators.spec"
 
 test.describe("Add Items to cart - Cart Page , @positive", () => {
 
@@ -22,18 +24,19 @@ test.describe("Add Items to cart - Cart Page , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Add one item to cart - Cart Page, @positive", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        expect(page.getByTestId("checkout")).toBeVisible()
-        expect(page.getByTestId("remove-sauce-labs-backpack")).toBeVisible()
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(CHECKOUT_BUTTON_LOCATOR)).toBeVisible()
+        await expect(page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK)).toBeVisible()
     })
 
     test("Add all items to cart - Cart Page, @positive", async ({ page }) => {
@@ -46,13 +49,12 @@ test.describe("Add Items to cart - Cart Page , @positive", () => {
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
 
-        const itemName = page.getByTestId("inventory-item-name")
-        const itemDescription = page.getByTestId("inventory-item-desc")
-        const itemPrice = page.getByTestId("inventory-item-price")
+        const itemName = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)
+        const itemDescription = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)
+        const itemPrice = page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)
 
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        expect(page.getByTestId("checkout")).toBeVisible()
-        expect(page.getByTestId("remove-sauce-labs-backpack")).toBeVisible()
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(CHECKOUT_BUTTON_LOCATOR)).toBeVisible()
 
         //Can be and should be improved to loop it somehow or match objects...
         expect(itemName.nth(0)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
@@ -89,18 +91,26 @@ test.describe("Remove items from cart - Cart Page , @positive", () => {
         await loginButton.press("Enter")
     })
 
+    test.afterEach(async ({ page }) => {
+        //The element was returning an error, because of that I had to use force: true to overcome it 
+        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
+        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
+        expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
+    })
+
     test("Remove one item from cart - Cart Page, @positive", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
 
         await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
-        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
-        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
-        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
-        expect(page.getByTestId("continue-shopping")).toBeVisible()
-        expect(page.getByTestId("checkout")).toBeVisible()
-        expect(page.getByTestId("remove-sauce-labs-backpack")).toBeVisible()
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_NAME)).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_DESCRIPTION)).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(CHECKOUT_BUTTON_LOCATOR)).toBeVisible()
+        expect(page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK)).toBeVisible()
 
-        await page.getByTestId("remove-sauce-labs-backpack").click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK).click({ force: true })
 
         const numberOfItemsInCartCounter = await page.getByTestId(CART_COUNTER_LOCATOR)
         expect(numberOfItemsInCartCounter).not.toHaveText
@@ -128,7 +138,4 @@ test.describe("Remove items from cart - Cart Page , @positive", () => {
         const numberOfItemsInCartCounter = await page.getByTestId(CART_COUNTER_LOCATOR)
         expect(numberOfItemsInCartCounter).not.toHaveText
     })
-
-
-
 })

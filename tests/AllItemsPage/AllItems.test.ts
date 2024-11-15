@@ -13,6 +13,13 @@ test.describe("Add Items to cart - Inventory Page , @positive", () => {
         const loginButton = page.getByTestId(LOGIN_BUTTON_LOCATOR)
         await loginButton.press("Enter")
     })
+    test.afterEach(async ({ page }) => {
+        //The element was returning an error, because of that I had to use force: true to overcome it 
+        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
+        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
+        expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
+    })
 
     test("Add one item to cart, @positive", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
@@ -31,23 +38,6 @@ test.describe("Add Items to cart - Inventory Page , @positive", () => {
         const numberOfItemsInCartCounter = await page.getByTestId(CART_COUNTER_LOCATOR)
         await expect(numberOfItemsInCartCounter).toHaveText("6")// Terrible hard coded value, I need to change it so it can dynamically count somehow
     })
-
-
-    test.afterEach(async ({ page }) => {
-        //The element was returning an error, because of that I had to use force: true to overcome it 
-        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
-        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
-        expect(page.url()).toEqual(LOGIN_PAGE_URL)
-    })
-
-
-
-
-
-
-
-
-
 })
 test.describe("Remove Items from cart - Inventory Page , @positive", () => {
 
@@ -63,6 +53,7 @@ test.describe("Remove Items from cart - Inventory Page , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Remove one item to cart, @positive", async ({ page }) => {
@@ -103,6 +94,7 @@ test.describe("Verify Sorting - Inventory Page  , @positive", () => {
         await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
         await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
+        page.close
     })
 
     test("Sort Items by Name(A-Z) , @positive", async ({ page }) => {
