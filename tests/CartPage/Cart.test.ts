@@ -21,8 +21,8 @@ test.describe("Add Items to cart - Cart Page , @positive", () => {
 
     test.afterEach(async ({ page }) => {
         //The element was returning an error, because of that I had to use force: true to overcome it 
-        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click
-        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click
+        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
+        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
         expect(page.url()).toEqual(LOGIN_PAGE_URL)
         page.close
     })
@@ -36,7 +36,7 @@ test.describe("Add Items to cart - Cart Page , @positive", () => {
         expect(page.getByTestId(ITEM_DETAILS_LOCATORS.ITEM_PRICE)).toHaveText(PRODUCT_PRICES.BACKPACK)
         expect(page.getByTestId(CONTINUE_SHOPPING_BUTTON_LOCATOR)).toBeVisible()
         expect(page.getByTestId(CHECKOUT_BUTTON_LOCATOR)).toBeVisible()
-        expect(page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK)).toBeVisible()
+        await expect(page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK)).toBeVisible()
     })
 
     test("Add all items to cart - Cart Page, @positive", async ({ page }) => {
