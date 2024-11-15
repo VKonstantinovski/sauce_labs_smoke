@@ -1,10 +1,11 @@
 import test, { expect } from "@playwright/test"
-import { ADD_ITEMS_TO_CART, CART_COUNTER_LOCATOR, EXPAND_SIDE_MENU_LOCATOR, LOGOUT_BUTTON_LOCATOR } from "../../Constants/Pages/AllItemsPage/AllItemsLocators.spec"
+import { ADD_ITEMS_TO_CART, CART_COUNTER_LOCATOR, EXPAND_SIDE_MENU_LOCATOR, LOGOUT_BUTTON_LOCATOR, REMOVE_ITEMS_FROM_CART } from "../../Constants/Pages/AllItemsPage/AllItemsLocators.spec"
 import { LOGIN_PAGE_URL, USER_NAME, PASSWORD } from "../../Constants/Pages/LoginPage/LoginConstants.spec"
 import { USER_NAME_LOCATOR, PASSWORD_LOCATOR, LOGIN_BUTTON_LOCATOR } from "../../Constants/Pages/LoginPage/LoginLocators.spec"
 import { OPEN_CART_DETAILS_BUTTON_LOCATOR } from "../../Constants/Pages/CartPage/CartPageLocators.spec"
 import { ITEM_NAMES_TEXT } from "../../Constants/Pages/ItemDetailsPage/ItemDetailsConstants.spec"
 import { PRODUCT_DETAILS, PRODUCT_PRICES } from "../../Constants/Pages/AllItemsPage/AllItemsConstants.spec"
+import { REMOVE_FROM_CART_BUTTON_LOCATOR } from "../../Constants/Pages/ItemDetailsPage/ItemDetailsLocators.spec"
 
 test.describe("Add Items to cart - Cart Page , @positive", () => {
 
@@ -74,5 +75,60 @@ test.describe("Add Items to cart - Cart Page , @positive", () => {
         expect(itemPrice.nth(3)).toHaveText(PRODUCT_PRICES.FLEECE_JACKET)
         expect(itemPrice.nth(4)).toHaveText(PRODUCT_PRICES.ONESIE)
         expect(itemPrice.nth(5)).toHaveText(PRODUCT_PRICES.T_SHIRT_RED)
+    })
 })
+
+
+test.describe("Remove items from cart - Cart Page , @positive", () => {
+
+    test.beforeEach(async ({ page }) => {
+        await page.goto(LOGIN_PAGE_URL)
+        await page.getByTestId(USER_NAME_LOCATOR).fill(USER_NAME)
+        await page.getByTestId(PASSWORD_LOCATOR).fill(PASSWORD)
+        const loginButton = page.getByTestId(LOGIN_BUTTON_LOCATOR)
+        await loginButton.press("Enter")
+    })
+
+    test("Remove one item from cart - Cart Page, @positive", async ({ page }) => {
+        await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
+
+        await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
+        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId("continue-shopping")).toBeVisible()
+        expect(page.getByTestId("checkout")).toBeVisible()
+        expect(page.getByTestId("remove-sauce-labs-backpack")).toBeVisible()
+
+        await page.getByTestId("remove-sauce-labs-backpack").click({ force: true })
+
+        const numberOfItemsInCartCounter = await page.getByTestId(CART_COUNTER_LOCATOR)
+        expect(numberOfItemsInCartCounter).not.toHaveText
+
+
+
+    })
+
+    test("Remove all items from Cart - Cart Page, @positive", async ({ page }) => {
+        await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
+        await page.getByTestId(ADD_ITEMS_TO_CART.BIKE_LIGHT).click({ force: true })
+        await page.getByTestId(ADD_ITEMS_TO_CART.T_SHIRT).click({ force: true })
+        await page.getByTestId(ADD_ITEMS_TO_CART.FLEECE_JACKET).click({ force: true })
+        await page.getByTestId(ADD_ITEMS_TO_CART.ONESIE).click({ force: true })
+        await page.getByTestId(ADD_ITEMS_TO_CART.T_SHIRT_RED).click({ force: true })
+
+        await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
+
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.BACKPACK).click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.BIKE_LIGHT).click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.T_SHIRT).click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.FLEECE_JACKET).click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.ONESIE).click({ force: true })
+        await page.getByTestId(REMOVE_ITEMS_FROM_CART.T_SHIRT_RED).click({ force: true })
+        const numberOfItemsInCartCounter = await page.getByTestId(CART_COUNTER_LOCATOR)
+        expect(numberOfItemsInCartCounter).not.toHaveText
+    })
+
+
+
 })
