@@ -2,7 +2,7 @@
 export enum CHECKOUT_DETAILS {
     FIRST_NAME = "First Name",
     LAST_NAME = "Last Name",
-    POSTAL_CODE = 2000
+    POSTAL_CODE = "2000"
 }
 
 

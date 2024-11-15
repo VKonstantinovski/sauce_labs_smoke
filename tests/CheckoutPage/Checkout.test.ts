@@ -6,7 +6,7 @@ import { ITEM_NAMES_TEXT } from "../../Constants/Pages/ItemDetailsPage/ItemDetai
 import { LOGIN_PAGE_URL, USER_NAME, PASSWORD } from "../../Constants/Pages/LoginPage/LoginConstants.spec"
 import { USER_NAME_LOCATOR, PASSWORD_LOCATOR, LOGIN_BUTTON_LOCATOR } from "../../Constants/Pages/LoginPage/LoginLocators.spec"
 import { CHECKOUT_DETAILS, extractAmount } from "../../Constants/Pages/CheckoutPage/CheckoutConstants.spec"
-import { ITEM_TOTAL, TAX, TOTAL } from "../../Constants/Pages/CheckoutPage/CheckoutLocators.spec"
+import { ITEM_TOTAL_LOCATOR, TAX_LOCATOR, TOTAL_LOCATOR } from "../../Constants/Pages/CheckoutPage/CheckoutLocators.spec"
 
 test.describe("Buy an item - Checkout Page , @positive", () => {
 
@@ -37,16 +37,15 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
 
         expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
 
-
         await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.FIRST_NAME)
-        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.LAST_NAME)
+        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.POSTAL_CODE)
 
         await page.getByTestId("continue").click({ force: true })
 
-        const itemTotalText = await page.locator(ITEM_TOTAL).textContent();
-        const taxText = await page.locator(TAX).textContent();
-        const totalText = await page.locator(TOTAL).textContent();
+        const itemTotalText = await page.locator(ITEM_TOTAL_LOCATOR).textContent();
+        const taxText = await page.locator(TAX_LOCATOR).textContent();
+        const totalText = await page.locator(TOTAL_LOCATOR).textContent();
 
         const itemTotal = extractAmount(itemTotalText);
         const tax = extractAmount(taxText);
@@ -61,28 +60,16 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
         expect(page.getByTestId("shipping-info-label")).toHaveText("Shipping Information:")
         expect(page.getByTestId("shipping-info-value")).toHaveText("Free Pony Express Delivery!")
         expect(page.getByTestId("total-info-label")).toHaveText("Price Total")
-
         expect(itemTotal + tax).toBeCloseTo(total, 2)
 
         await page.getByTestId("finish").click({ force: true })
 
-
         expect(page.getByTestId("complete-header")).toHaveText("Thank you for your order!")
         expect(page.getByTestId("complete-text")).toHaveText("Your order has been dispatched, and will arrive just as fast as the pony can get there!")
         expect(page.getByTestId("back-to-products")).toHaveText("Back Home")
-
-
-
-
-
-
-
-
-
-
     })
 
-    test("Add all items to cart - Cart Page, @positive", async ({ page }) => {
+    test("Buy All Items - Cart Page, @positive", async ({ page }) => {
         await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
         await page.getByTestId(ADD_ITEMS_TO_CART.BIKE_LIGHT).click({ force: true })
         await page.getByTestId(ADD_ITEMS_TO_CART.T_SHIRT).click({ force: true })
@@ -121,5 +108,117 @@ test.describe("Buy an item - Checkout Page , @positive", () => {
         expect(itemPrice.nth(3)).toHaveText(PRODUCT_PRICES.FLEECE_JACKET)
         expect(itemPrice.nth(4)).toHaveText(PRODUCT_PRICES.ONESIE)
         expect(itemPrice.nth(5)).toHaveText(PRODUCT_PRICES.T_SHIRT_RED)
+
+        page.getByTestId("checkout").click({ force: true })
+
+        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.FIRST_NAME)
+
+        await page.getByTestId("continue").click({ force: true })
+
+        const itemTotalText = await page.locator(ITEM_TOTAL_LOCATOR).textContent();
+        const taxText = await page.locator(TAX_LOCATOR).textContent();
+        const totalText = await page.locator(TOTAL_LOCATOR).textContent();
+
+        const itemTotal = extractAmount(itemTotalText);
+        const tax = extractAmount(taxText);
+        const total = extractAmount(totalText);
+
+        expect(page.getByTestId("payment-info-label")).toHaveText("Payment Information:")
+        expect(page.getByTestId("payment-info-value")).toHaveText
+        expect(page.getByTestId("shipping-info-label")).toHaveText("Shipping Information:")
+        expect(page.getByTestId("shipping-info-value")).toHaveText("Free Pony Express Delivery!")
+        expect(page.getByTestId("total-info-label")).toHaveText("Price Total")
+        expect(itemTotal + tax).toBeCloseTo(total, 2)
+
+        await page.getByTestId("finish").click({ force: true })
+
+        expect(page.getByTestId("complete-header")).toHaveText("Thank you for your order!")
+        expect(page.getByTestId("complete-text")).toHaveText("Your order has been dispatched, and will arrive just as fast as the pony can get there!")
+        expect(page.getByTestId("back-to-products")).toHaveText("Back Home")
+    })
+})
+test.describe("Buy an item without valid information - Checkout Page , @negative", () => {
+
+    test.beforeEach(async ({ page }) => {
+        await page.goto(LOGIN_PAGE_URL)
+        await page.getByTestId(USER_NAME_LOCATOR).fill(USER_NAME)
+        await page.getByTestId(PASSWORD_LOCATOR).fill(PASSWORD)
+        const loginButton = page.getByTestId(LOGIN_BUTTON_LOCATOR)
+        await loginButton.press("Enter")
+    })
+
+    test.afterEach(async ({ page }) => {
+        //The element was returning an error, because of that I had to use force: true to overcome it 
+        await page.getByTestId(EXPAND_SIDE_MENU_LOCATOR).click({ force: true })
+        await page.getByTestId(LOGOUT_BUTTON_LOCATOR).click()
+        expect(page.url()).toEqual(LOGIN_PAGE_URL)
+    })
+
+    test("Buy an item without First Name - Checkout Page, @negative", async ({ page }) => {
+        await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
+
+        await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
+        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId("continue-shopping")).toBeVisible()
+        page.getByTestId("checkout").click({ force: true })
+
+        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+
+        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.FIRST_NAME)
+
+        await page.getByTestId("continue").click({ force: true })
+
+        expect(page.getByTestId("error")).toHaveText("Error: First Name is required")
+
+
+    })
+    test("Buy an item without Last Name - Checkout Page, @negative", async ({ page }) => {
+        await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
+
+        await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
+        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId("continue-shopping")).toBeVisible()
+        page.getByTestId("checkout").click({ force: true })
+
+        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+
+        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("postalCode").fill(CHECKOUT_DETAILS.POSTAL_CODE)
+
+        await page.getByTestId("continue").click({ force: true })
+
+        expect(page.getByTestId("error")).toHaveText("Error: Last Name is required")
+
+
+    })
+    test("Buy an item without Postal Code - Checkout Page, @negative", async ({ page }) => {
+
+        await page.getByTestId(ADD_ITEMS_TO_CART.BACKPACK).click({ force: true })
+
+        await page.getByTestId(OPEN_CART_DETAILS_BUTTON_LOCATOR).click({ force: true })
+        expect(page.getByTestId("inventory-item-name")).toHaveText(ITEM_NAMES_TEXT.BACKPACK)
+        expect(page.getByTestId("inventory-item-desc")).toHaveText(PRODUCT_DETAILS.BACKPACK)
+        expect(page.getByTestId("inventory-item-price")).toHaveText(PRODUCT_PRICES.BACKPACK)
+        expect(page.getByTestId("continue-shopping")).toBeVisible()
+        page.getByTestId("checkout").click({ force: true })
+
+        expect(page.getByTestId("title")).toHaveText("Checkout: Your Information")
+
+        await page.getByTestId("firstName").fill(CHECKOUT_DETAILS.FIRST_NAME)
+        await page.getByTestId("lastName").fill(CHECKOUT_DETAILS.LAST_NAME)
+
+        await page.getByTestId("continue").click({ force: true })
+
+        expect(page.getByTestId("error")).toHaveText("Error: Postal Code is required")
+
+
+
     })
 })
